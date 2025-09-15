@@ -34,6 +34,8 @@ model User {
   sessions       Session[]
   refreshTokens  RefreshToken[]
   passwordResets PasswordReset[]
+  scores         Score[]
+  practiceSessions PracticeSession[]
   
   @@index([email])
   @@index([username])
@@ -107,6 +109,93 @@ model PasswordReset {
   @@map("password_resets")
 }
 
+// Score model
+model Score {
+  id              String    @id @default(uuid())
+  title           String
+  artist          String?
+  genre           String?
+  difficulty      Difficulty @default(INTERMEDIATE)
+  
+  // Content
+  musicXml        String?   @db.Text @map("music_xml")
+  tabData         Json?     @map("tab_data")
+  midiData        Bytes?    @map("midi_data")
+  audioUrl        String?   @map("audio_url")
+  thumbnailUrl    String?   @map("thumbnail_url")
+  
+  // Metadata
+  duration        Int?      // in seconds
+  tempo           Int?      // BPM
+  key             String?   // Musical key
+  timeSignature   String?   @map("time_signature")
+  tuning          String?   @default("EADGBE")
+  capo            Int?      @default(0)
+  
+  // Analysis
+  styleAnalysis   Json?     @map("style_analysis")
+  guitaristStyle  String?   @map("guitarist_style")
+  techniques      String[]
+  
+  // Ownership
+  userId          String    @map("user_id")
+  isPublic        Boolean   @default(false) @map("is_public")
+  
+  // Stats
+  views           Int       @default(0)
+  likes           Int       @default(0)
+  
+  // Timestamps
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  
+  // Relations
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  practiceSessions PracticeSession[]
+  transcription   Transcription?
+  
+  @@index([userId])
+  @@index([title])
+  @@index([artist])
+  @@map("scores")
+}
+
+// Practice Session model
+model PracticeSession {
+  id              String    @id @default(uuid())
+  
+  // Session info
+  scoreId         String    @map("score_id")
+  userId          String    @map("user_id")
+  
+  // Practice data
+  startTime       DateTime  @default(now()) @map("start_time")
+  endTime         DateTime? @map("end_time")
+  duration        Int?      // in seconds
+  
+  // Progress
+  measuresPlayed  Int       @default(0) @map("measures_played")
+  accuracy        Float?    // 0-100
+  tempo           Int?      // Practice tempo
+  loopStart       Int?      @map("loop_start")
+  loopEnd         Int?      @map("loop_end")
+  
+  // Notes
+  notes           String?   @db.Text
+  
+  // Performance metrics
+  metrics         Json?
+  
+  // Relations
+  score           Score     @relation(fields: [scoreId], references: [id], onDelete: Cascade)
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([scoreId])
+  @@index([startTime])
+  @@map("practice_sessions")
+}
+
 // Transcription model
 model Transcription {
   id             String    @id @default(uuid())
@@ -139,6 +228,8 @@ model Transcription {
   // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   jobs Job[]
+  scoreId String? @unique @map("score_id")
+  score Score? @relation(fields: [scoreId], references: [id])
   
   @@index([userId])
   @@index([status])
@@ -179,6 +270,15 @@ enum UserRole {
   ADMIN
   
   @@map("user_role")
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  PROFESSIONAL
+  
+  @@map("difficulty")
 }
 
 enum SourceType {
