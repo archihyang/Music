@@ -8,7 +8,7 @@ import { logger } from '../utils/logger';
 
 export interface AuthRequest extends Request {
   user?: {
-    id: string;
+    userId: string;
     email: string;
     role: string;
   };
@@ -30,7 +30,7 @@ export function authenticate(req: AuthRequest, res: Response, next: NextFunction
     const decoded = jwt.verify(token, JWT_SECRET) as any;
     
     req.user = {
-      id: decoded.id,
+      userId: decoded.userId || decoded.id,
       email: decoded.email,
       role: decoded.role || 'user'
     };

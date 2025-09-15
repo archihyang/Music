@@ -36,7 +36,9 @@
       "Bash(git commit:*)",
       "Bash(gh:*)",
       "Bash(git remote add:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(npx prisma:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []
