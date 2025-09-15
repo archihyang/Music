@@ -1,3 +1,42 @@
+/**
+ * Shared TypeScript types
+ */
+
+// User types
+export interface User {
+  id: string;
+  email: string;
+  username: string;
+  profilePicture?: string;
+  bio?: string;
+  role: 'USER' | 'PREMIUM' | 'ADMIN';
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Score types
+export interface Score {
+  id: string;
+  title: string;
+  artist?: string;
+  genre?: string;
+  difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'PROFESSIONAL';
+  tempo?: number;
+  key?: string;
+  timeSignature?: string;
+  duration?: number;
+  tabData?: any;
+  musicXml?: string;
+  midiData?: any;
+  audioUrl?: string;
+  thumbnailUrl?: string;
+  isPublic: boolean;
+  userId: string;
+  user?: User;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // 업로드 관련 타입
 export interface UploadStatus {
   status: 'idle' | 'uploading' | 'completed' | 'error';
