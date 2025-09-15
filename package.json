@@ -1,0 +1,68 @@
+{
+  "name": "genesis-music",
+  "version": "0.1.0",
+  "description": "AI-powered guitar learning platform for rock/metal enthusiasts",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -n \"FRONT,BACK,AI\" -c \"cyan,yellow,magenta\" \"npm run dev:frontend\" \"npm run dev:backend\" \"npm run dev:ai\"",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:ai": "cd ai-models && python src/main.py",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "test": "concurrently \"npm run test:frontend\" \"npm run test:backend\" \"npm run test:ai\"",
+    "test:frontend": "cd frontend && npm run test",
+    "test:backend": "cd backend && npm run test",
+    "test:ai": "cd ai-models && python -m pytest tests/",
+    "lint": "npm run lint:frontend && npm run lint:backend && npm run lint:ai",
+    "lint:frontend": "cd frontend && npm run lint",
+    "lint:backend": "cd backend && npm run lint",
+    "lint:ai": "cd ai-models && black --check . && pylint src/",
+    "format": "npm run format:frontend && npm run format:backend && npm run format:ai",
+    "format:frontend": "cd frontend && npm run format",
+    "format:backend": "cd backend && npm run format",
+    "format:ai": "cd ai-models && black .",
+    "clean": "npm run clean:frontend && npm run clean:backend && npm run clean:ai",
+    "clean:frontend": "cd frontend && rm -rf node_modules dist .svelte-kit",
+    "clean:backend": "cd backend && rm -rf node_modules dist",
+    "clean:ai": "cd ai-models && rm -rf __pycache__ .pytest_cache *.pyc",
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install && cd ../ai-models && pip install -r requirements.txt"
+  },
+  "workspaces": [
+    "frontend",
+    "backend",
+    "ai-models"
+  ],
+  "devDependencies": {
+    "@commitlint/cli": "^18.4.0",
+    "@commitlint/config-conventional": "^18.4.0",
+    "@playwright/test": "^1.55.0",
+    "concurrently": "^8.2.0",
+    "eslint": "^8.56.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.2.0",
+    "playwright": "^1.55.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "local"
+  },
+  "keywords": [
+    "guitar",
+    "music-education",
+    "ai",
+    "transcription",
+    "svelte",
+    "web-audio-api"
+  ],
+  "author": "Genesis Music Developer",
+  "license": "PRIVATE"
+}

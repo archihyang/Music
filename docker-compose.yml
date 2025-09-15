@@ -1,0 +1,219 @@
+version: '3.8'
+
+services:
+  # PostgreSQL - Main Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: genesis-postgres
+    environment:
+      POSTGRES_USER: genesis
+      POSTGRES_PASSWORD: genesis_pass
+      POSTGRES_DB: genesis_music
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/migrations:/docker-entrypoint-initdb.d
+    networks:
+      - genesis-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U genesis"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  # Redis - Cache and Queue
+  redis:
+    image: redis:7-alpine
+    container_name: genesis-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass redis_pass
+    networks:
+      - genesis-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  # Kong Database
+  kong-database:
+    image: postgres:13-alpine
+    container_name: genesis-kong-db
+    environment:
+      POSTGRES_USER: kong
+      POSTGRES_DB: kong
+      POSTGRES_PASSWORD: kongpass
+    volumes:
+      - kong_data:/var/lib/postgresql/data
+    networks:
+      - genesis-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kong"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  # Kong Migration
+  kong-migration:
+    image: kong:3.4
+    container_name: genesis-kong-migration
+    depends_on:
+      kong-database:
+        condition: service_healthy
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: kongpass
+    command: kong migrations bootstrap
+    networks:
+      - genesis-network
+    restart: on-failure
+  
+  # Kong API Gateway
+  kong:
+    image: kong:3.4
+    container_name: genesis-kong
+    depends_on:
+      kong-database:
+        condition: service_healthy
+      kong-migration:
+        condition: service_completed_successfully
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: kongpass
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_ADMIN_GUI_URL: http://localhost:8002
+    ports:
+      - "8000:8000"    # Proxy
+      - "8443:8443"    # Proxy SSL
+      - "8001:8001"    # Admin API
+      - "8444:8444"    # Admin API SSL
+      - "8002:8002"    # Admin GUI
+    networks:
+      - genesis-network
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+  
+  # User Service (Go) - To be built
+  # user-service:
+  #   build: ./backend/services/user-service
+  #   container_name: genesis-user-service
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   environment:
+  #     DATABASE_URL: postgres://genesis:genesis_pass@postgres:5432/genesis_music
+  #     REDIS_URL: redis://:redis_pass@redis:6379
+  #     JWT_SECRET: ${JWT_SECRET}
+  #     REFRESH_SECRET: ${REFRESH_SECRET}
+  #     PORT: 3000
+  #   ports:
+  #     - "3000:3000"
+  #   networks:
+  #     - genesis-network
+  
+  # Transcription Service (Python) - To be built
+  # transcription-service:
+  #   build: ./ai-models
+  #   container_name: genesis-transcription-service
+  #   depends_on:
+  #     redis:
+  #       condition: service_healthy
+  #   environment:
+  #     REDIS_URL: redis://:redis_pass@redis:6379
+  #     MODEL_PATH: /app/models
+  #     PORT: 8080
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - ./ai-models/models:/app/models
+  #   networks:
+  #     - genesis-network
+  
+  # Rendering Service (Node.js) - To be built
+  # rendering-service:
+  #   build: ./backend/services/rendering-service
+  #   container_name: genesis-rendering-service
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   environment:
+  #     DATABASE_URL: postgres://genesis:genesis_pass@postgres:5432/genesis_music
+  #     REDIS_URL: redis://:redis_pass@redis:6379
+  #     PORT: 3001
+  #   ports:
+  #     - "3001:3001"
+  #   networks:
+  #     - genesis-network
+  
+  # Frontend (SvelteKit) - Development mode
+  # frontend:
+  #   build: ./frontend
+  #   container_name: genesis-frontend
+  #   depends_on:
+  #     - kong
+  #   environment:
+  #     PUBLIC_API_URL: http://localhost:8000
+  #     PUBLIC_WS_URL: ws://localhost:3001
+  #   ports:
+  #     - "5173:5173"
+  #   networks:
+  #     - genesis-network
+
+  # Redis Commander for debugging
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: genesis-redis-commander
+    environment:
+      REDIS_HOSTS: local:redis:6379:0:redis_pass
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - genesis-network
+
+  # pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: genesis-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@genesis.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - genesis-network
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  postgres_data:
+  redis_data:
+  kong_data:
+  pgadmin_data:
+
+networks:
+  genesis-network:
+    driver: bridge

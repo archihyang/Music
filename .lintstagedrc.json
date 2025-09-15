@@ -1,0 +1,16 @@
+{
+  "*.{js,jsx,ts,tsx,svelte}": [
+    "prettier --write",
+    "eslint --fix"
+  ],
+  "*.{json,md,yml,yaml}": [
+    "prettier --write"
+  ],
+  "*.py": [
+    "black",
+    "pylint"
+  ],
+  "*.{css,scss}": [
+    "prettier --write"
+  ]
+}

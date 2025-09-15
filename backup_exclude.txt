@@ -1,0 +1,13 @@
+node_modules\
+__pycache__\
+*.pyc
+*.pyo
+*.log
+*.tmp
+.git\
+venv\
+.venv\
+dist\
+build\
+downloads\
+backups\

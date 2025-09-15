@@ -1,0 +1,155 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  transcriptions Transcription[]
+  preferences    UserPreferences?
+  sessions       Session[]
+  
+  @@map("users")
+}
+
+// User preferences
+model UserPreferences {
+  userId             String   @id @map("user_id")
+  guitarTuning       String   @default("standard") @map("guitar_tuning")
+  notationPreference String   @default("tab") @map("notation_preference")
+  difficultyLevel    String   @default("intermediate") @map("difficulty_level")
+  theme              String   @default("light")
+  emailNotifications Boolean  @default(true) @map("email_notifications")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("user_preferences")
+}
+
+// Session management
+model Session {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  token        String   @unique
+  refreshToken String   @unique @map("refresh_token")
+  expiresAt    DateTime @map("expires_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([token])
+  @@map("sessions")
+}
+
+// Transcription model
+model Transcription {
+  id             String    @id @default(uuid())
+  userId         String    @map("user_id")
+  sourceType     SourceType @map("source_type")
+  sourceUrl      String?   @map("source_url")
+  sourceFilename String?   @map("source_filename")
+  status         TranscriptionStatus
+  progress       Int       @default(0)
+  
+  // File paths
+  audioPath      String?   @map("audio_path")
+  midiPath       String?   @map("midi_path")
+  
+  // Results (JSONB)
+  tabData        Json?     @map("tab_data")
+  theoryAnalysis Json?     @map("theory_analysis")
+  
+  // Metadata
+  durationSeconds Int?     @map("duration_seconds")
+  tempo          Int?
+  keySignature   String?   @map("key_signature")
+  timeSignature  String?   @map("time_signature")
+  
+  // Timestamps
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  completedAt    DateTime? @map("completed_at")
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobs Job[]
+  
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("transcriptions")
+}
+
+// Job queue model
+model Job {
+  id               String   @id @default(uuid())
+  transcriptionId  String   @map("transcription_id")
+  celeryTaskId     String?  @unique @map("celery_task_id")
+  status           JobStatus
+  progress         Int      @default(0)
+  errorMessage     String?  @map("error_message")
+  
+  // Processing details
+  startedAt        DateTime? @map("started_at")
+  completedAt      DateTime? @map("completed_at")
+  processingTimeMs Int?      @map("processing_time_ms")
+  
+  // Timestamps
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  
+  // Relations
+  transcription Transcription @relation(fields: [transcriptionId], references: [id], onDelete: Cascade)
+  
+  @@index([celeryTaskId])
+  @@index([status])
+  @@map("jobs")
+}
+
+// Enums
+enum SourceType {
+  YOUTUBE
+  UPLOAD
+  
+  @@map("source_type")
+}
+
+enum TranscriptionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  
+  @@map("transcription_status")
+}
+
+enum JobStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  RETRYING
+  
+  @@map("job_status")
+}

@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Read(*)",
+      "Edit(*)",
+      "Write(*)",
+      "MultiEdit(*)",
+      "NotebookEdit(*)",
+      "Task(*)",
+      "WebFetch(*)",
+      "WebSearch(*)",
+      "Grep(*)",
+      "Glob(*)",
+      "LS(*)",
+      "TodoRead(*)",
+      "TodoWrite(*)",
+      "NotebookRead(*)",
+      "BashOutput(*)",
+      "KillBash(*)",
+      "ExitPlanMode(*)"
+    ],
+    "defaultMode": "bypassPermissions"
+  }
+}

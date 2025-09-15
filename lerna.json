@@ -1,0 +1,42 @@
+{
+  "version": "0.1.0",
+  "npmClient": "npm",
+  "packages": [
+    "frontend",
+    "backend",
+    "ai-models"
+  ],
+  "command": {
+    "bootstrap": {
+      "hoist": true
+    },
+    "publish": {
+      "conventionalCommits": true,
+      "message": "chore(release): publish",
+      "registry": "https://registry.npmjs.org",
+      "allowBranch": [
+        "main",
+        "release/*"
+      ]
+    },
+    "version": {
+      "allowBranch": [
+        "main",
+        "release/*"
+      ],
+      "conventionalCommits": true,
+      "createRelease": "github",
+      "exact": true,
+      "message": "chore(release): %v"
+    },
+    "run": {
+      "stream": true
+    }
+  },
+  "ignoreChanges": [
+    "**/*.md",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/test/**"
+  ]
+}

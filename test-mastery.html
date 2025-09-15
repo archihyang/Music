@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genesis Music - Guitar Mastery System Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #ff6b35, #f72c00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: #999;
+            font-size: 1.2rem;
+        }
+        
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        
+        .tab-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, #ff6b35, #f72c00);
+            border-color: #ff6b35;
+        }
+        
+        .content {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            color: #333;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: #1a1a1a;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        select {
+            padding: 0.5rem 1rem;
+            border: 2px solid #e5e5e5;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .card {
+            background: white;
+            border: 2px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-color: #ff6b35;
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #1a1a1a;
+        }
+        
+        .card-info {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .difficulty {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        
+        .difficulty.beginner { background: #d1fae5; color: #065f46; }
+        .difficulty.intermediate { background: #fed7aa; color: #92400e; }
+        .difficulty.advanced { background: #fee2e2; color: #991b1b; }
+        .difficulty.master { background: #ede9fe; color: #5b21b6; }
+        
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+        }
+        
+        .techniques {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .technique-tag {
+            padding: 0.2rem 0.5rem;
+            background: #f0f0f0;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        .btn-practice {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #ff6b35, #f72c00);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-practice:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(255,107,53,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎸 Guitar Mastery System</h1>
+            <p class="subtitle">70-80년대 전설의 기타리스트들처럼 연주하세요</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('songs')">🎵 곡 추천</button>
+            <button class="tab-btn" onclick="showTab('modules')">🎯 연습 모듈</button>
+            <button class="tab-btn" onclick="showTab('stats')">📊 API 상태</button>
+        </div>
+        
+        <div class="content">
+            <div id="songs-section" class="section">
+                <h2 class="section-title">전문가 추천 기타 연주곡</h2>
+                
+                <div class="filters">
+                    <select id="genre-filter" onchange="loadSongs()">
+                        <option value="">모든 장르</option>
+                        <option value="Classic Rock">클래식 록</option>
+                        <option value="Progressive Rock">프로그레시브 록</option>
+                        <option value="Hard Rock">하드 록</option>
+                        <option value="Heavy Metal">헤비 메탈</option>
+                    </select>
+                    
+                    <select id="difficulty-filter" onchange="loadSongs()">
+                        <option value="">모든 난이도</option>
+                        <option value="초급">초급</option>
+                        <option value="중급">중급</option>
+                        <option value="고급">고급</option>
+                    </select>
+                </div>
+                
+                <div id="songs-grid" class="grid">
+                    <div class="loading">곡을 불러오는 중...</div>
+                </div>
+            </div>
+            
+            <div id="modules-section" class="section" style="display: none;">
+                <h2 class="section-title">전문 연습 모듈</h2>
+                
+                <div class="filters">
+                    <select id="category-filter" onchange="loadModules()">
+                        <option value="">모든 카테고리</option>
+                        <option value="warmup">손풀기</option>
+                        <option value="scale">스케일</option>
+                        <option value="technique">테크닉</option>
+                        <option value="chord">코드</option>
+                        <option value="phrase">프레이즈</option>
+                    </select>
+                </div>
+                
+                <div id="modules-grid" class="grid">
+                    <div class="loading">모듈을 불러오는 중...</div>
+                </div>
+            </div>
+            
+            <div id="stats-section" class="section" style="display: none;">
+                <h2 class="section-title">API 서버 상태</h2>
+                <div id="api-status">
+                    <p>백엔드 서버 확인 중...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://localhost:3000/api/mastery';
+        
+        function showTab(tab) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            // Show selected section
+            document.getElementById(`${tab}-section`).style.display = 'block';
+            event.target.classList.add('active');
+            
+            // Load data
+            if (tab === 'songs') loadSongs();
+            else if (tab === 'modules') loadModules();
+            else if (tab === 'stats') checkAPIStatus();
+        }
+        
+        async function loadSongs() {
+            const genre = document.getElementById('genre-filter').value;
+            const difficulty = document.getElementById('difficulty-filter').value;
+            
+            const params = new URLSearchParams();
+            if (genre) params.append('genre', genre);
+            if (difficulty) params.append('difficulty', difficulty);
+            params.append('limit', '12');
+            
+            try {
+                const response = await fetch(`${API_BASE}/songs/recommendations?${params}`);
+                const data = await response.json();
+                
+                const grid = document.getElementById('songs-grid');
+                
+                if (data.success && data.data.length > 0) {
+                    grid.innerHTML = data.data.map(song => `
+                        <div class="card">
+                            <div class="card-title">${song.title}</div>
+                            <div class="card-info">
+                                <p>🎤 ${song.artist}</p>
+                                ${song.guitarist ? `<p>🎸 ${song.guitarist}</p>` : ''}
+                                <p>📅 ${song.year} • ${song.genre}</p>
+                                ${song.tempo && song.key ? `<p>🎵 ${song.key} • ${song.tempo} BPM</p>` : ''}
+                            </div>
+                            ${song.techniques && song.techniques.length > 0 ? `
+                                <div class="techniques">
+                                    ${song.techniques.slice(0, 3).map(t => `<span class="technique-tag">${t}</span>`).join('')}
+                                </div>
+                            ` : ''}
+                            <span class="difficulty ${getDifficultyClass(song.difficulty)}">${song.difficulty}</span>
+                            <button class="btn-practice" onclick="window.open('${song.youtubeUrl}', '_blank')">
+                                YouTube에서 보기
+                            </button>
+                        </div>
+                    `).join('');
+                } else {
+                    grid.innerHTML = '<p>곡을 찾을 수 없습니다.</p>';
+                }
+            } catch (error) {
+                document.getElementById('songs-grid').innerHTML = `<p style="color: red;">오류: ${error.message}</p>`;
+            }
+        }
+        
+        async function loadModules() {
+            const category = document.getElementById('category-filter').value;
+            
+            const params = new URLSearchParams();
+            if (category) params.append('category', category);
+            params.append('limit', '20');
+            
+            try {
+                const response = await fetch(`${API_BASE}/practice-modules?${params}`);
+                const data = await response.json();
+                
+                const grid = document.getElementById('modules-grid');
+                
+                if (data.success && data.data.length > 0) {
+                    grid.innerHTML = data.data.map(module => `
+                        <div class="card">
+                            <div class="card-title">${module.name}</div>
+                            <div class="card-info">
+                                <p>${module.description}</p>
+                                <p>⏱️ ${module.duration}분</p>
+                                ${module.goals && module.goals.length > 0 ? `
+                                    <p><strong>학습 목표:</strong></p>
+                                    <ul style="margin-left: 1rem;">
+                                        ${module.goals.slice(0, 3).map(g => `<li>${g}</li>`).join('')}
+                                    </ul>
+                                ` : ''}
+                            </div>
+                            ${module.techniques && module.techniques.length > 0 ? `
+                                <div class="techniques">
+                                    ${module.techniques.map(t => `<span class="technique-tag">${t}</span>`).join('')}
+                                </div>
+                            ` : ''}
+                            <span class="difficulty ${getDifficultyClass(module.difficulty)}">${module.difficulty}</span>
+                        </div>
+                    `).join('');
+                } else {
+                    grid.innerHTML = '<p>모듈을 찾을 수 없습니다.</p>';
+                }
+            } catch (error) {
+                document.getElementById('modules-grid').innerHTML = `<p style="color: red;">오류: ${error.message}</p>`;
+            }
+        }
+        
+        async function checkAPIStatus() {
+            const statusDiv = document.getElementById('api-status');
+            
+            try {
+                const response = await fetch('http://localhost:3000/health');
+                const data = await response.json();
+                
+                statusDiv.innerHTML = `
+                    <div style="padding: 1rem; background: #d1fae5; border-radius: 8px; margin-bottom: 1rem;">
+                        <h3 style="color: #065f46;">✅ 백엔드 서버 정상 작동 중</h3>
+                        <p>상태: ${data.status}</p>
+                        <p>시간: ${new Date(data.timestamp).toLocaleString('ko-KR')}</p>
+                    </div>
+                    
+                    <h3>사용 가능한 엔드포인트:</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li>📍 GET /api/mastery/songs/recommendations</li>
+                        <li>📍 GET /api/mastery/songs/by-genre/:genre</li>
+                        <li>📍 GET /api/mastery/songs/by-guitarist/:guitarist</li>
+                        <li>📍 GET /api/mastery/practice-modules</li>
+                        <li>📍 GET /api/mastery/learning-paths</li>
+                        <li>📍 GET /api/mastery/songs/popular</li>
+                    </ul>
+                `;
+                
+                // 추가로 곡 수와 모듈 수 확인
+                const songsResponse = await fetch(`${API_BASE}/songs/recommendations?limit=100`);
+                const songsData = await songsResponse.json();
+                
+                const modulesResponse = await fetch(`${API_BASE}/practice-modules?limit=100`);
+                const modulesData = await modulesResponse.json();
+                
+                statusDiv.innerHTML += `
+                    <div style="margin-top: 1rem; padding: 1rem; background: #f3f4f6; border-radius: 8px;">
+                        <h3>데이터베이스 현황:</h3>
+                        <p>🎵 등록된 곡: ${songsData.data ? songsData.data.length : 0}개</p>
+                        <p>🎯 연습 모듈: ${modulesData.data ? modulesData.data.length : 0}개</p>
+                    </div>
+                `;
+                
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div style="padding: 1rem; background: #fee2e2; border-radius: 8px;">
+                        <h3 style="color: #991b1b;">❌ 백엔드 서버 연결 실패</h3>
+                        <p>오류: ${error.message}</p>
+                        <p>백엔드 서버가 실행 중인지 확인해주세요.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function getDifficultyClass(difficulty) {
+            switch(difficulty) {
+                case '초급': return 'beginner';
+                case '중급': return 'intermediate';
+                case '고급': return 'advanced';
+                case '마스터': return 'master';
+                default: return '';
+            }
+        }
+        
+        // Load songs on page load
+        window.onload = () => {
+            loadSongs();
+        };
+    </script>
+</body>
+</html>

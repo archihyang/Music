@@ -1,0 +1,596 @@
+{
+  "project": {
+    "id": "GENESIS-MUSIC-MVP",
+    "name": "Genesis Music AI Guitar Learning Platform",
+    "description": "AI 기반 기타 학습 플랫폼 - YouTube/MP3 → Tab/악보 자동 변환",
+    "status": "ACTIVE",
+    "created_at": "2025-01-09T00:00:00Z",
+    "strategy": "systematic",
+    "duration_weeks": 10,
+    "team_size": 4,
+    "settings": {
+      "persistence": true,
+      "wave_mode": true,
+      "validation_gates": "strict",
+      "mcp_routing": true,
+      "parallel_execution": true
+    }
+  },
+  "epics": [
+    {
+      "id": "EPIC-001",
+      "title": "Infrastructure & Foundation",
+      "description": "프로젝트 기반 구조 및 개발 환경 설정",
+      "status": "NOT_STARTED",
+      "priority": "CRITICAL",
+      "estimated_weeks": 2,
+      "assigned_to": ["DevOps", "Backend"],
+      "dependencies": [],
+      "stories": [
+        {
+          "id": "STORY-001",
+          "title": "Development Environment Setup",
+          "status": "NOT_STARTED",
+          "points": 8,
+          "tasks": [
+            {
+              "id": "TASK-001",
+              "title": "Configure monorepo structure",
+              "status": "COMPLETED",
+              "estimated_hours": 2,
+              "assigned_to": "DevOps",
+              "validation_criteria": ["npm run dev works", "all services start"]
+            },
+            {
+              "id": "TASK-002",
+              "title": "Set up Docker environment",
+              "status": "COMPLETED",
+              "estimated_hours": 6,
+              "assigned_to": "DevOps",
+              "validation_criteria": ["docker-compose up successful", "hot reload working"]
+            },
+            {
+              "id": "TASK-003",
+              "title": "Configure CI/CD pipeline",
+              "status": "NOT_STARTED",
+              "estimated_hours": 6,
+              "assigned_to": "DevOps",
+              "validation_criteria": ["GitHub Actions configured", "tests run on PR"]
+            }
+          ]
+        },
+        {
+          "id": "STORY-002",
+          "title": "Database & Storage Setup",
+          "status": "NOT_STARTED",
+          "points": 5,
+          "tasks": [
+            {
+              "id": "TASK-004",
+              "title": "Design PostgreSQL schema",
+              "status": "NOT_STARTED",
+              "estimated_hours": 2,
+              "assigned_to": "Backend",
+              "validation_criteria": ["migrations created", "schema documented"]
+            },
+            {
+              "id": "TASK-005",
+              "title": "Configure Redis caching",
+              "status": "NOT_STARTED",
+              "estimated_hours": 1,
+              "assigned_to": "Backend",
+              "validation_criteria": ["Redis connected", "caching strategy defined"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EPIC-002",
+      "title": "AI Core Services",
+      "description": "핵심 AI 서비스 - 오디오 전사, MIDI 변환, Tab 생성",
+      "status": "IN_PROGRESS",
+      "priority": "CRITICAL",
+      "estimated_weeks": 3,
+      "assigned_to": ["AI/ML Engineer"],
+      "dependencies": ["EPIC-001"],
+      "stories": [
+        {
+          "id": "STORY-003",
+          "title": "YouTube Audio Processing",
+          "status": "NOT_STARTED",
+          "points": 13,
+          "tasks": [
+            {
+              "id": "TASK-006",
+              "title": "Implement YouTube downloader",
+              "status": "COMPLETED",
+              "estimated_hours": 4,
+              "assigned_to": "AI/ML",
+              "validation_criteria": ["YouTube URL → audio file", "error handling"]
+            },
+            {
+              "id": "TASK-007",
+              "title": "Build audio preprocessing pipeline",
+              "status": "NOT_STARTED",
+              "estimated_hours": 4,
+              "assigned_to": "AI/ML",
+              "validation_criteria": ["normalization working", "chunk splitting"]
+            },
+            {
+              "id": "TASK-008",
+              "title": "Integrate Celery task queue",
+              "status": "NOT_STARTED",
+              "estimated_hours": 4,
+              "assigned_to": "AI/ML",
+              "validation_criteria": ["async processing", "progress tracking"]
+            }
+          ]
+        },
+        {
+          "id": "STORY-004",
+          "title": "Basic Pitch Integration",
+          "status": "NOT_STARTED",
+          "points": 21,
+          "tasks": [
+            {
+              "id": "TASK-009",
+              "title": "Integrate Basic Pitch model",
+              "status": "COMPLETED",
+              "estimated_hours": 6,
+              "assigned_to": "AI/ML",
+              "validation_criteria": ["model loaded", "GPU acceleration"]
+            },
+            {
+              "id": "TASK-010",
+              "title": "Implement MIDI post-processing",
+              "status": "NOT_STARTED",
+              "estimated_hours": 6,
+              "assigned_to": "AI/ML",
+              "validation_criteria": ["quantization working", "chord detection"]
+            },
+            {
+              "id": "TASK-011",
+              "title": "Optimize performance",
+              "status": "NOT_STARTED",
+              "estimated_hours": 4,
+              "assigned_to": "AI/ML",
+              "validation_criteria": ["<30s for 3min song", "memory efficient"]
+            }
+          ]
+        },
+        {
+          "id": "STORY-005",
+          "title": "Tab Generation System",
+          "status": "NOT_STARTED",
+          "points": 21,
+          "tasks": [
+            {
+              "id": "TASK-012",
+              "title": "Build MIDI to Tab converter",
+              "status": "COMPLETED",
+              "estimated_hours": 8,
+              "assigned_to": "AI/ML",
+              "validation_criteria": ["fret positions optimized", "chord shapes recognized"]
+            },
+            {
+              "id": "TASK-013",
+              "title": "Implement Tab renderer",
+              "status": "NOT_STARTED",
+              "estimated_hours": 8,
+              "assigned_to": "Backend",
+              "validation_criteria": ["VexFlow format", "JSON serialization"]
+            },
+            {
+              "id": "TASK-014",
+              "title": "Add guitar-specific optimizations",
+              "status": "NOT_STARTED",
+              "estimated_hours": 4,
+              "assigned_to": "AI/ML",
+              "validation_criteria": ["open strings used", "barre chords detected"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EPIC-003",
+      "title": "Frontend Implementation",
+      "description": "사용자 인터페이스 - Tab 뷰어, 오디오 플레이어, 학습 도구",
+      "status": "NOT_STARTED",
+      "priority": "HIGH",
+      "estimated_weeks": 3,
+      "assigned_to": ["Frontend Developer"],
+      "dependencies": ["EPIC-001"],
+      "can_parallel": true,
+      "stories": [
+        {
+          "id": "STORY-006",
+          "title": "Core UI Components",
+          "status": "NOT_STARTED",
+          "points": 8,
+          "tasks": [
+            {
+              "id": "TASK-015",
+              "title": "Set up routing and layout",
+              "status": "NOT_STARTED",
+              "estimated_hours": 4,
+              "assigned_to": "Frontend",
+              "validation_criteria": ["navigation working", "responsive design"]
+            },
+            {
+              "id": "TASK-016",
+              "title": "Configure state management",
+              "status": "NOT_STARTED",
+              "estimated_hours": 4,
+              "assigned_to": "Frontend",
+              "validation_criteria": ["Svelte stores configured", "reactive updates"]
+            }
+          ]
+        },
+        {
+          "id": "STORY-007",
+          "title": "Audio Upload Component",
+          "status": "NOT_STARTED",
+          "points": 13,
+          "tasks": [
+            {
+              "id": "TASK-017",
+              "title": "Build file upload UI",
+              "status": "NOT_STARTED",
+              "estimated_hours": 4,
+              "assigned_to": "Frontend",
+              "validation_criteria": ["drag-drop working", "YouTube URL input"]
+            },
+            {
+              "id": "TASK-018",
+              "title": "Implement progress tracking",
+              "status": "NOT_STARTED",
+              "estimated_hours": 3,
+              "assigned_to": "Frontend",
+              "validation_criteria": ["WebSocket connected", "real-time updates"]
+            },
+            {
+              "id": "TASK-019",
+              "title": "Add error handling UI",
+              "status": "NOT_STARTED",
+              "estimated_hours": 3,
+              "assigned_to": "Frontend",
+              "validation_criteria": ["validation working", "error messages clear"]
+            }
+          ]
+        },
+        {
+          "id": "STORY-008",
+          "title": "VexFlow Tab Viewer",
+          "status": "NOT_STARTED",
+          "points": 21,
+          "tasks": [
+            {
+              "id": "TASK-020",
+              "title": "Integrate VexFlow library",
+              "status": "NOT_STARTED",
+              "estimated_hours": 8,
+              "assigned_to": "Frontend",
+              "validation_criteria": ["tab rendering", "notation accurate"]
+            },
+            {
+              "id": "TASK-021",
+              "title": "Add interactive features",
+              "status": "NOT_STARTED",
+              "estimated_hours": 8,
+              "assigned_to": "Frontend",
+              "validation_criteria": ["zoom working", "scroll sync", "print view"]
+            },
+            {
+              "id": "TASK-022",
+              "title": "Mobile optimization",
+              "status": "NOT_STARTED",
+              "estimated_hours": 4,
+              "assigned_to": "Frontend",
+              "validation_criteria": ["responsive layout", "touch gestures"]
+            }
+          ]
+        },
+        {
+          "id": "STORY-009",
+          "title": "Audio Player",
+          "status": "NOT_STARTED",
+          "points": 21,
+          "tasks": [
+            {
+              "id": "TASK-023",
+              "title": "Build playback controls",
+              "status": "NOT_STARTED",
+              "estimated_hours": 6,
+              "assigned_to": "Frontend",
+              "validation_criteria": ["play/pause/seek", "tempo control"]
+            },
+            {
+              "id": "TASK-024",
+              "title": "Add visualization",
+              "status": "NOT_STARTED",
+              "estimated_hours": 6,
+              "assigned_to": "Frontend",
+              "validation_criteria": ["waveform display", "playhead sync"]
+            },
+            {
+              "id": "TASK-025",
+              "title": "Implement synchronization",
+              "status": "NOT_STARTED",
+              "estimated_hours": 4,
+              "assigned_to": "Frontend",
+              "validation_criteria": ["tab-audio sync", "auto-scroll"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EPIC-004",
+      "title": "Integration & Testing",
+      "description": "서비스 통합, 테스팅, 보안, 성능 최적화",
+      "status": "NOT_STARTED",
+      "priority": "HIGH",
+      "estimated_weeks": 2,
+      "assigned_to": ["Full Team"],
+      "dependencies": ["EPIC-002", "EPIC-003"],
+      "stories": [
+        {
+          "id": "STORY-010",
+          "title": "API Integration",
+          "status": "NOT_STARTED",
+          "points": 13,
+          "tasks": [
+            {
+              "id": "TASK-026",
+              "title": "Build REST API endpoints",
+              "status": "NOT_STARTED",
+              "estimated_hours": 6,
+              "assigned_to": "Backend",
+              "validation_criteria": ["CRUD operations", "error handling"]
+            },
+            {
+              "id": "TASK-027",
+              "title": "Implement WebSocket communication",
+              "status": "NOT_STARTED",
+              "estimated_hours": 6,
+              "assigned_to": "Backend",
+              "validation_criteria": ["real-time updates", "connection handling"]
+            }
+          ]
+        },
+        {
+          "id": "STORY-011",
+          "title": "E2E Testing",
+          "status": "NOT_STARTED",
+          "points": 21,
+          "tasks": [
+            {
+              "id": "TASK-028",
+              "title": "Write core user flow tests",
+              "status": "NOT_STARTED",
+              "estimated_hours": 8,
+              "assigned_to": "QA",
+              "validation_criteria": ["all flows covered", "Playwright tests pass"]
+            },
+            {
+              "id": "TASK-029",
+              "title": "Cross-browser testing",
+              "status": "NOT_STARTED",
+              "estimated_hours": 4,
+              "assigned_to": "QA",
+              "validation_criteria": ["Chrome/Firefox/Safari", "mobile browsers"]
+            },
+            {
+              "id": "TASK-030",
+              "title": "Performance testing",
+              "status": "NOT_STARTED",
+              "estimated_hours": 4,
+              "assigned_to": "QA",
+              "validation_criteria": ["load time <3s", "memory usage ok"]
+            }
+          ]
+        },
+        {
+          "id": "STORY-012",
+          "title": "Security & Optimization",
+          "status": "NOT_STARTED",
+          "points": 13,
+          "tasks": [
+            {
+              "id": "TASK-031",
+              "title": "Implement authentication",
+              "status": "NOT_STARTED",
+              "estimated_hours": 6,
+              "assigned_to": "Backend",
+              "validation_criteria": ["JWT working", "session management"]
+            },
+            {
+              "id": "TASK-032",
+              "title": "Security vulnerability scan",
+              "status": "NOT_STARTED",
+              "estimated_hours": 3,
+              "assigned_to": "Security",
+              "validation_criteria": ["OWASP compliant", "no critical issues"]
+            },
+            {
+              "id": "TASK-033",
+              "title": "Performance optimization",
+              "status": "NOT_STARTED",
+              "estimated_hours": 5,
+              "assigned_to": "Full Team",
+              "validation_criteria": ["bundle <500KB", "API <200ms"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EPIC-005",
+      "title": "Deployment & Launch",
+      "description": "프로덕션 배포, 모니터링, 문서화",
+      "status": "NOT_STARTED",
+      "priority": "MEDIUM",
+      "estimated_weeks": 2,
+      "assigned_to": ["DevOps", "Full Team"],
+      "dependencies": ["EPIC-004"],
+      "stories": [
+        {
+          "id": "STORY-013",
+          "title": "Production Deployment",
+          "status": "NOT_STARTED",
+          "points": 21,
+          "tasks": [
+            {
+              "id": "TASK-034",
+              "title": "Set up cloud infrastructure",
+              "status": "NOT_STARTED",
+              "estimated_hours": 8,
+              "assigned_to": "DevOps",
+              "validation_criteria": ["Kubernetes configured", "auto-scaling"]
+            },
+            {
+              "id": "TASK-035",
+              "title": "Configure CI/CD for production",
+              "status": "NOT_STARTED",
+              "estimated_hours": 4,
+              "assigned_to": "DevOps",
+              "validation_criteria": ["blue-green deploy", "rollback ready"]
+            },
+            {
+              "id": "TASK-036",
+              "title": "Set up domain and SSL",
+              "status": "NOT_STARTED",
+              "estimated_hours": 4,
+              "assigned_to": "DevOps",
+              "validation_criteria": ["HTTPS working", "CDN configured"]
+            }
+          ]
+        },
+        {
+          "id": "STORY-014",
+          "title": "Monitoring & Analytics",
+          "status": "NOT_STARTED",
+          "points": 13,
+          "tasks": [
+            {
+              "id": "TASK-037",
+              "title": "Set up application monitoring",
+              "status": "NOT_STARTED",
+              "estimated_hours": 6,
+              "assigned_to": "DevOps",
+              "validation_criteria": ["Sentry configured", "metrics collected"]
+            },
+            {
+              "id": "TASK-038",
+              "title": "Configure log aggregation",
+              "status": "NOT_STARTED",
+              "estimated_hours": 3,
+              "assigned_to": "DevOps",
+              "validation_criteria": ["ELK stack ready", "alerts configured"]
+            },
+            {
+              "id": "TASK-039",
+              "title": "Add user analytics",
+              "status": "NOT_STARTED",
+              "estimated_hours": 3,
+              "assigned_to": "Frontend",
+              "validation_criteria": ["GA configured", "events tracked"]
+            }
+          ]
+        },
+        {
+          "id": "STORY-015",
+          "title": "Documentation",
+          "status": "NOT_STARTED",
+          "points": 8,
+          "tasks": [
+            {
+              "id": "TASK-040",
+              "title": "Write user documentation",
+              "status": "NOT_STARTED",
+              "estimated_hours": 4,
+              "assigned_to": "Tech Writer",
+              "validation_criteria": ["getting started guide", "FAQ complete"]
+            },
+            {
+              "id": "TASK-041",
+              "title": "Create developer documentation",
+              "status": "NOT_STARTED",
+              "estimated_hours": 4,
+              "assigned_to": "Tech Writer",
+              "validation_criteria": ["API docs", "architecture docs"]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "total_epics": 5,
+    "total_stories": 15,
+    "total_tasks": 41,
+    "total_story_points": 193,
+    "estimated_hours": 220,
+    "parallel_tracks": [
+      {
+        "name": "AI Services Track",
+        "epics": ["EPIC-002"],
+        "team": ["AI/ML Engineer"]
+      },
+      {
+        "name": "Frontend Track",
+        "epics": ["EPIC-003"],
+        "team": ["Frontend Developer"]
+      },
+      {
+        "name": "Infrastructure Track",
+        "epics": ["EPIC-001", "EPIC-005"],
+        "team": ["DevOps"]
+      }
+    ],
+    "milestones": [
+      {
+        "name": "Development Environment Ready",
+        "week": 2,
+        "criteria": ["EPIC-001 complete"]
+      },
+      {
+        "name": "Core AI Services Working",
+        "week": 5,
+        "criteria": ["EPIC-002 complete"]
+      },
+      {
+        "name": "MVP Feature Complete",
+        "week": 8,
+        "criteria": ["EPIC-003 complete", "EPIC-004 complete"]
+      },
+      {
+        "name": "Production Launch",
+        "week": 10,
+        "criteria": ["EPIC-005 complete", "all tests passing"]
+      }
+    ],
+    "risk_register": [
+      {
+        "risk": "AI model accuracy insufficient",
+        "probability": "medium",
+        "impact": "high",
+        "mitigation": "Ensemble models, user feedback loop"
+      },
+      {
+        "risk": "Performance issues with large files",
+        "probability": "medium",
+        "impact": "medium",
+        "mitigation": "Chunking, caching, async processing"
+      },
+      {
+        "risk": "Cross-browser compatibility",
+        "probability": "low",
+        "impact": "medium",
+        "mitigation": "Progressive enhancement, polyfills"
+      }
+    ]
+  }
+}

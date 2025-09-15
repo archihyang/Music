@@ -1,0 +1,568 @@
+openapi: 3.0.0
+info:
+  title: Genesis Music API
+  description: AI-powered guitar learning platform API
+  version: 1.0.0
+  contact:
+    name: Genesis Music Team
+    email: api@genesismusic.com
+
+servers:
+  - url: https://api.genesismusic.com/v1
+    description: Production server
+  - url: http://localhost:3001/api
+    description: Development server
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Authentication
+    description: User authentication endpoints
+  - name: Transcription
+    description: Audio transcription and tab generation
+  - name: User
+    description: User management
+  - name: Files
+    description: File upload and management
+
+paths:
+  # Authentication Endpoints
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register new user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+      responses:
+        201:
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        409:
+          description: Email already exists
+
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: User login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        200:
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        401:
+          description: Invalid credentials
+
+  /auth/refresh:
+    post:
+      tags: [Authentication]
+      summary: Refresh access token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        200:
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  # Transcription Endpoints
+  /transcribe:
+    post:
+      tags: [Transcription]
+      summary: Start transcription job
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                audioFile:
+                  type: string
+                  format: binary
+                  description: Audio file (MP3, WAV, M4A)
+                youtubeUrl:
+                  type: string
+                  format: url
+                  description: YouTube video URL
+                options:
+                  type: object
+                  properties:
+                    tuning:
+                      type: string
+                      enum: [standard, drop_d, half_step_down, open_g]
+                      default: standard
+                    difficulty:
+                      type: string
+                      enum: [beginner, intermediate, advanced]
+                      default: intermediate
+                    includeTheory:
+                      type: boolean
+                      default: true
+      responses:
+        202:
+          description: Transcription job started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobId:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum: [pending, processing]
+                  estimatedTime:
+                    type: integer
+                    description: Estimated processing time in seconds
+        400:
+          $ref: '#/components/responses/BadRequest'
+        429:
+          description: Rate limit exceeded
+
+  /transcribe/{jobId}:
+    get:
+      tags: [Transcription]
+      summary: Get transcription status
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Job status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranscriptionJob'
+        404:
+          description: Job not found
+
+    delete:
+      tags: [Transcription]
+      summary: Cancel transcription job
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Job cancelled
+        404:
+          description: Job not found
+
+  /transcribe/{jobId}/result:
+    get:
+      tags: [Transcription]
+      summary: Get transcription result
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [json, musicxml, midi, pdf]
+            default: json
+      responses:
+        200:
+          description: Transcription result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranscriptionResult'
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        202:
+          description: Still processing
+        404:
+          description: Job not found
+
+  # User Endpoints
+  /users/profile:
+    get:
+      tags: [User]
+      summary: Get user profile
+      responses:
+        200:
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+
+    patch:
+      tags: [User]
+      summary: Update user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfileUpdate'
+      responses:
+        200:
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+
+  /users/transcriptions:
+    get:
+      tags: [User]
+      summary: Get user's transcription history
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, processing, completed, failed]
+      responses:
+        200:
+          description: Transcription history
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TranscriptionJob'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  # WebSocket Events (Documentation)
+  /ws:
+    get:
+      tags: [WebSocket]
+      summary: WebSocket connection for real-time updates
+      description: |
+        WebSocket endpoint for real-time job progress updates.
+        
+        **Client Events:**
+        - `subscribe:job` - Subscribe to job updates
+        - `unsubscribe:job` - Unsubscribe from job updates
+        
+        **Server Events:**
+        - `progress:update` - Job progress update (0-100)
+        - `job:complete` - Job completed successfully
+        - `job:error` - Job failed with error
+        - `job:cancelled` - Job was cancelled
+      responses:
+        101:
+          description: Switching Protocols
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+          description: Token expiry in seconds
+        user:
+          $ref: '#/components/schemas/UserProfile'
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        createdAt:
+          type: string
+          format: date-time
+        preferences:
+          type: object
+          properties:
+            guitarTuning:
+              type: string
+              default: standard
+            notationPreference:
+              type: string
+              enum: [tab, standard, both]
+              default: tab
+            difficultyLevel:
+              type: string
+              enum: [beginner, intermediate, advanced]
+              default: intermediate
+            theme:
+              type: string
+              enum: [light, dark, auto]
+              default: light
+
+    UserProfileUpdate:
+      type: object
+      properties:
+        preferences:
+          type: object
+          properties:
+            guitarTuning:
+              type: string
+            notationPreference:
+              type: string
+            difficultyLevel:
+              type: string
+            theme:
+              type: string
+
+    TranscriptionJob:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        sourceType:
+          type: string
+          enum: [youtube, upload]
+        sourceUrl:
+          type: string
+        sourceFilename:
+          type: string
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+        errorMessage:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        metadata:
+          type: object
+          properties:
+            duration:
+              type: integer
+              description: Duration in seconds
+            tempo:
+              type: integer
+              description: BPM
+            keySignature:
+              type: string
+            timeSignature:
+              type: string
+
+    TranscriptionResult:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        tabData:
+          type: object
+          properties:
+            measures:
+              type: array
+              items:
+                type: object
+                properties:
+                  number:
+                    type: integer
+                  notes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        string:
+                          type: integer
+                          minimum: 1
+                          maximum: 6
+                        fret:
+                          type: integer
+                          minimum: 0
+                        duration:
+                          type: string
+                          enum: [whole, half, quarter, eighth, sixteenth]
+                        techniques:
+                          type: array
+                          items:
+                            type: string
+                            enum: [hammer, pull, slide, bend, vibrato]
+        theoryAnalysis:
+          type: object
+          properties:
+            key:
+              type: string
+            scale:
+              type: string
+            chordProgression:
+              type: array
+              items:
+                type: object
+                properties:
+                  chord:
+                    type: string
+                  measure:
+                    type: integer
+                  beat:
+                    type: number
+            sections:
+              type: array
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    enum: [intro, verse, chorus, bridge, solo, outro]
+                  startMeasure:
+                    type: integer
+                  endMeasure:
+                    type: integer
+        audioUrl:
+          type: string
+          format: url
+          description: Original audio file URL
+        midiUrl:
+          type: string
+          format: url
+          description: Generated MIDI file URL
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
